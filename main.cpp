@@ -31,3 +31,31 @@ void spsc_init(struct spsc_queue *q) {
     atomic_init(&q->head.value, 0);
     atomic_init(&q->tail.value, 0);
 }
+
+int spsc_push(struct spsc_queue *q, struct item item) {
+    size_t tail = atomic_load_explicit(&q->tail.value, memory_order_relaxed);
+
+    size_t next_tail = (tail + 1) & MASK;
+
+    if (next_tail == atomic_load_explicit(&q->head.value, memory_order_acquire)) {
+        return 0;
+    }
+
+    q->buffer.data[tail] = item;
+
+    atomic_store_explicit(&q->tail.value, next_tail, memory_order_release);
+    return 1;
+}
+
+int spsc_pop(struct spsc_queue *q, struct item *out) {
+    size_t head = atomic_load_explicit(&q->head.value, memory_order_relaxed);
+
+    if (head == atomic_load_explicit(&q->tail.value, memory_order_acquire)) {
+        return 0;
+    }
+
+    *out = q->buffer.data[head];
+
+    atomic_store_explicit(&q->head.value, (head + 1) & MASK, memory_order_release);
+    return 1;
+}
