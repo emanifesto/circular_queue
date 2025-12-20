@@ -1,18 +1,14 @@
-#include <cstddef>
-#include <cstdint>
-#include <memory>
+#include <stddef.h>
+#include <stdint.h>
 
-struct Data {
+#define CACHE_LINE 64
+#define CAPACITY 1024             
+#define MASK (CAPACITY - 1)
+
+struct data {
     uint64_t value;
 };
 
-
-template <typename T>
-struct RingBuffer {
-    const size_t capacity;
-    std::unique_ptr<T[]> buffer;
-
-    explicit RingBuffer(size_t cap)
-        : capacity(cap),
-          buffer(std::make_unique<T[]>(cap)) {}
+struct ring_buffer {
+    struct data data[CAPACITY];
 };
