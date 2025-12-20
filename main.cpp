@@ -59,3 +59,7 @@ int spsc_pop(struct spsc_queue *q, struct item *out) {
     atomic_store_explicit(&q->head.value, (head + 1) & MASK, memory_order_release);
     return 1;
 }
+
+int main(void){
+    return 0;
+}
